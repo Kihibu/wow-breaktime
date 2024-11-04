@@ -1,0 +1,9 @@
+## Interface: 90005
+## Title: BreakTime
+## Notes: Reminds you to take a break.
+## Author: Akarficus (Hekita) of Dawnbringer
+
+libs\LibStub\LibStub.lua
+libs\AceTimer-3.0\AceTimer-3.0.lua
+Core.lua
+BreakTimeWidget.xml

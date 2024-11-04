@@ -1,0 +1,63 @@
+----- v2.4.1.0 ----- 
+
+- Added new sounds
+- Updated Ace 3 libs
+
+----- v2.4.0.01 ----- 
+
+- Added new sounds
+
+----- v2.4.0.0 ----- 
+
+- Updated Ace3 libraries and reworked sound code to work with the new SoundKIT system
+
+----- v2.3.0.0 ----- 
+
+- Updated Ace3 libraries to the latest version for compatibility with Legion
+
+----- v2.2.0.0 ----- 
+
+- Added the ability to reset the timer. Now, typing /bt gui will just show the options window. To get to the blizzard interface options window, just type /bt as before. Also, you can type /bt help for a list of commands. See readme for more information on what each command does.
+
+----- v2.1.1.0 ----- 
+
+- Fixed the bug that made the output text show "hours" or "minutes" when the hours or minutes was equal to one.
+
+----- v2.1.0.0 ----- 
+
+- The mod will now display a message on the screen that had been broke since a WoW API change to MessageFrame:AddMessage. Updated Ace3 libraries with the latest release.
+
+----- v2.0.1.0 ----- 
+
+- Fixed the bug that made the mod attempt to lookup the default timer message in the locale file when it is not suppose to.
+
+----- v2.0.0.0 ----- 
+
+- Break Time is back! Updated the Ace3 libraries and made the addon compatible  with Catalysm (even though it's kinda late). 
+- Addon will be made compatible  with Mysts of Pandora (if needed) in the next version. Also, added some new sounds that can be played when the event time is fired.
+
+----- v1.1.0.0 -----
+
+- Fixed the bugs that carried over from the 1.0 release. All should be well now.
+
+----- v1.0.0.0 ----- 
+
+- Added sounds to be played when the message is displayed and redid the fire time option to be user-friendly. Mod now fully works with the WoW 3.0.2 patch.
+
+----- v0.1.0.0 -----
+
+- Released mod for WoW 2.4 patch.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
