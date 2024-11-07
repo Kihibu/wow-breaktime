@@ -1,9 +1,14 @@
-## Interface: 90005
-## Title: BreakTime
-## Notes: Reminds you to take a break.
+## Interface: 100206
+## Title: Break Time!
+## Notes: Reminds you when to take a break.
 ## Author: Akarficus (Hekita) of Dawnbringer
+## Version: 2.4.1.0
+## SavedVariables: BreakTimeDB
+## OptionalDeps: Ace3
+## X-Embeds: Ace3
+## X-Category: Chat/Communication
 
-libs\LibStub\LibStub.lua
-libs\AceTimer-3.0\AceTimer-3.0.lua
-Core.lua
+embeds.xml
+
+Locale-enUS.lua
 BreakTimeWidget.xml

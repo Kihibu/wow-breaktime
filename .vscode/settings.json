@@ -31,6 +31,16 @@
     "SetDesaturation",
     "ColorPickerFrame",
     "OKAY",
-    "NOT_BOUND"
+    "NOT_BOUND",
+    "CHROMIE_TIME_PREVIEW_CARD_DEFAULT_TITLE",
+    "CHROMIE_TIME_PREVIEW_CARD_DEFAULT_DESCRIPTION",
+    "CreateFramePool",
+    "TextureKitConstants",
+    "GameTooltip_AddNormalLine",
+    "CHROMIE_TIME_CAMPAIGN_COMPLETE",
+    "CHROMIE_TIME_CAMPAIGN_ALREADY_ON",
+    "ChromieTimeFrameMixin",
+    "message",
+    "GenerateClosure"
   ]
 }

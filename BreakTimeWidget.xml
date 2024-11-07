@@ -1,31 +1,123 @@
-<Ui xmlns="http://www.blizzard.com/wow/ui/">
-    <Frame name="BreakTimeFrame" parent="UIParent" hidden="true">
-        <Size>
-            <AbsDimension x="1024" y="768"/> <!-- Adjust size as needed -->
-        </Size>
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\..\..\..\..\WoW\Data\Interface\AddOns\Blizzard_SharedXML\UI.xsd">
+    <Script file="BreakTimeWidget.lua"/>
+    <Frame name="BreakTimeFrame" parent="UIParent" mixin="BreakTime" hidden="true">
+        <Size x="450" y="560"/>
+        <KeyValues>
+          <KeyValue key="layoutType" value="WoodenNeutralFrameTemplate" type="string"/>
+        </KeyValues>
         <Anchors>
             <Anchor point="CENTER"/>
         </Anchors>
-        <Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background" edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
-            <BackgroundInsets>
-                <AbsInset left="11" right="12" top="12" bottom="11"/>
-            </BackgroundInsets>
-            <TileSize>
-                <AbsValue val="32"/>
-            </TileSize>
-            <EdgeSize>
-                <AbsValue val="32"/>
-            </EdgeSize>
-        </Backdrop>
-        <BackdropColor r="0" g="0" b="0" a="0.8"/>
-        <Layers>
-            <Layer level="ARTWORK">
-                <FontString name="$parentText" inherits="GameFontNormalLarge" justifyH="CENTER">
+        <Frames>
+          <Frame parentKey="NineSlice" inherits="NineSlicePanelTemplate" setAllPoints="true"/>
+          <Button parentKey="PlayMoreButton" mixin="UIButtonMixin" inherits="UIPanelButtonTemplate" hidden="true">
+            <Size x="150" y="25"/>
+            <Anchors>
+              <Anchor point="BOTTOM" x="0" y="75"/>
+            </Anchors>
+            <Scripts>
+              <OnClick method="OnClick"/>
+            </Scripts>
+          </Button>
+          <Button name="$parent.ExitGameButton" parentKey="ExitGameButton" inherits="SecureActionButtonTemplate" text="Exit Game">
+            <Attributes>
+              <Attribute name="type" value="macro"/>
+              <Attribute name="macrotext" value="/quit"/>
+            </Attributes>
+            <Size x="150" y="25"/>
+            <Layers>
+              <Layer level="BACKGROUND">
+                <Texture parentKey="Left" file="Interface\Buttons\UI-Panel-Button-Up">
+                  <Size x="12" y="22"/>
+                  <Anchors>
+                    <Anchor point="TOPLEFT"/>
+                    <Anchor point="BOTTOMLEFT"/>
+                  </Anchors>
+                  <TexCoords left="0" right="0.09375" top="0" bottom="0.6875"/>
+                </Texture>
+                <Texture parentKey="Right" file="Interface\Buttons\UI-Panel-Button-Up">
+                  <Size x="12" y="22"/>
+                  <Anchors>
+                    <Anchor point="TOPRIGHT"/>
+                    <Anchor point="BOTTOMRIGHT"/>
+                  </Anchors>
+                  <TexCoords left="0.53125" right="0.625" top="0" bottom="0.6875"/>
+                </Texture>
+                <Texture parentKey="Middle" file="Interface\Buttons\UI-Panel-Button-Up">
+                  <Size x="12" y="22"/>
+                  <Anchors>
+                    <Anchor point="TOPLEFT" relativeKey="$parent.Left" relativePoint="TOPRIGHT"/>
+                    <Anchor point="BOTTOMRIGHT" relativeKey="$parent.Right" relativePoint="BOTTOMLEFT"/>
+                  </Anchors>
+                  <TexCoords left="0.09375" right="0.53125" top="0" bottom="0.6875"/>
+                </Texture>
+              </Layer>
+              <Layer level="ARTWORK">
+                <FontString parentKey="Text" inherits="GameFontNormal" text="Exit Game" setAllPoints="true"/>
+              </Layer>
+            </Layers>
+            <Anchors>
+              <Anchor point="BOTTOM" x="0" y="45" />
+            </Anchors>
+            <HighlightTexture inherits="UIPanelButtonHighlightTexture"/>
+          </Button>
+            <Frame parentKey="Background" clipChildren="true" useParentLevel="true">
+              <Anchors>
+                <Anchor point="TOPLEFT"/>
+                <Anchor point="BOTTOMRIGHT" x="-2"/>
+              </Anchors>
+              <Layers>
+                <Layer level="BACKGROUND" textureSubLevel="-1">
+                  <Texture parentKey="BackgroundTile" atlas="UI-Frame-Neutral-BackgroundTile" horizTile="true" vertTile="true" setAllPoints="true"/>
+                </Layer>
+              </Layers>
+            </Frame>
+            <Frame parentKey="BreakTimeContent" hidden="false" >
+              <Size x="350" y="377"/>
+              <Anchors>
+                <Anchor point="TOP" x="0" y="-25"/> 
+              </Anchors>
+              <Layers>
+                <Layer level="BACKGROUND" textureSubLevel="-1">
+                  <Texture parentKey="Background" atlas="ChromieTime-Parchment" useAtlasSize="true">
                     <Anchors>
-                        <Anchor point="CENTER"/>
+                      <Anchor point="TOP"/>
                     </Anchors>
-                </FontString>
-            </Layer>
-        </Layers>
+                  </Texture>
+                </Layer>
+                <Layer level="ARTWORK">
+                  <Texture parentKey="PortraitBorder" atlas="ChromieTime-Portrait-Frame" useAtlasSize="true">
+                    <Anchors>
+                      <Anchor point="TOP" x="0" y="-20"/>
+                    </Anchors>
+                  </Texture>
+                </Layer>
+                <Layer level="BORDER">
+                  <Texture parentKey="Portrait" atlas="ChromieTime-Portrait-Chrome">
+                    <Anchors>
+                      <Anchor point="TOPLEFT" relativeKey="$parent.PortraitBorder" x="9" y="-9"/>
+                      <Anchor point="BOTTOMRIGHT" relativeKey="$parent.PortraitBorder" x="-9" y="9"/>
+                    </Anchors>
+                  </Texture>
+                    <FontString parentKey="BreakTimeTitle" justifyH="LEFT" justifyV="BOTTOM" inherits="QuestFont_Super_Huge" text="It's time to take a break!">
+                      <Size x="310" y="0"/>
+                      <Anchors>
+                        <Anchor point="TOP" relativeKey="$parent.Portrait" relativePoint="BOTTOM" x="0" y="-20"/>
+                      </Anchors>
+                      <Color r="0.2824" g="0.0157" b="0.0157"/>
+                    </FontString>
+                    <FontString parentKey="BreakTimeDescription" justifyH="LEFT" justifyV="TOP" inherits="SystemFont_Med3" text="Take a break from the grind and enjoy some time off.">
+                      <Size x="310" y="0"/>
+                      <Anchors>
+                        <Anchor point="TOP" relativeKey="$parent.BreakTimeTitle" relativePoint="BOTTOM" x="0" y="-10"/>
+                      </Anchors>
+                      <Color r="0.2824" g="0.0157" b="0.0157"/>
+                    </FontString>
+                </Layer>
+              </Layers>
+            </Frame>
+
+        </Frames>
     </Frame>
 </Ui> 

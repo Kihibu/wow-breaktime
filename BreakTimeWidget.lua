@@ -7,8 +7,17 @@ local secs = 0
 local mins = 0
 local hrs = 0
 
+local NextSleepTimeCheck = nil
+
 BreakTime = LibStub("AceAddon-3.0"):NewAddon("BreakTime", "AceConsole-3.0", "AceTimer-3.0", "AceEvent-3.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("BreakTime", true)
+
+local SleepTimeFirst = "23:00"
+local SleepTimeSecond = "23:30"
+local PlayMoreTimeAmountInMinutes = 10
+
+-- Add this constant at the top with other constants
+local WakeUpTime = "06:00"
 
 -- changed fire time to a dropdown box
 local options = {
@@ -156,6 +165,7 @@ local defaults = {
 local optionsFrame
 
 function BreakTime:OnInitialize()
+    print("OnInitialize")
     -- Called when the addon is loaded
     self.db = LibStub("AceDB-3.0"):New("BreakTimeDB", defaults, "Default")
     
@@ -166,9 +176,16 @@ function BreakTime:OnInitialize()
 end
 
 function BreakTime:OnEnable()
+    print("OnEnable")
     -- Called when the addon is enabled
 	-- Schedules a timer to call the "CheckBreakEvent" function every second
     self:ScheduleRepeatingTimer("CheckBreakEvent", 1)
+end
+
+function BreakTime:OnPlayMoreButtonClick()
+    BreakTimeFrame:Hide()
+    -- Set NextSleepTimeCheck to current time plus PlayMoreTimeAmountInMinutes
+    NextSleepTimeCheck = time() + (PlayMoreTimeAmountInMinutes * 60)
 end
 
 function BreakTime:OnDisable()
@@ -245,66 +262,134 @@ function BreakTime:ResetTimer()
 end
 
 -- Function to create and show the custom widget
-function BreakTime:ShowBreakWidget(message)
-    if not BreakTimeFrame then
-        -- If the frame is not created, show an error or handle it
-        self:Print("BreakTimeFrame not found!")
+function BreakTime:ShowBreakWidget(title, description, showPlayMoreButton, shouldHideAfterTimeout)
+    -- Check if frame is already visible
+    if not BreakTimeFrame or BreakTimeFrame and BreakTimeFrame:IsVisible() then
         return
     end
 
-    -- Set the message and show the frame
-    BreakTimeFrameText:SetText(message)
+    local content = BreakTimeFrame.BreakTimeContent
+    local playMoreBtn = BreakTimeFrame.PlayMoreButton
+
+    -- Set message content
+    content.BreakTimeTitle:SetText(title)
+    content.BreakTimeDescription:SetText(description)
+
+    -- Handle play more button
+    if showPlayMoreButton then
+        playMoreBtn:SetOnClickHandler(GenerateClosure(self.OnPlayMoreButtonClick, self))
+        playMoreBtn:SetText(string.format("Give me %d minutes", PlayMoreTimeAmountInMinutes))
+        playMoreBtn:Show()
+    else
+        playMoreBtn:Hide()
+    end
+
+    if shouldHideAfterTimeout then
+        -- Auto-hide frame after 10 seconds for regular breaks
+        C_Timer.After(10, function() BreakTimeFrame:Hide() end)
+    end
+
     BreakTimeFrame:Show()
-
-    -- Hide the frame after a certain time (e.g., 10 seconds)
-    C_Timer.After(10, function() BreakTimeFrame:Hide() end)
 end
 
---This is assciated with a timer that fires every sec. When the seconds counter reaches the fireTime, it sends a message to the user.
-function BreakTime:CheckBreakEvent()
-	-- increment seconds counter by one
-	secs = secs + 1
-	if secs % string.format("%i", strsub(self.db.profile.fireTime, 2)) == 0 then
-		-- convert seconds counter to hours
-		newhrs = secs / 60 / 60
-		hrs = math.floor(newhrs)
-		-- convert seconds counter to minutes
-		newmins = secs / 60
-		mins = math.floor(newmins)
-		
-		-- converts the minutes counter to show the correct amount of minutes
-		-- ex. 75 minutes - 60 minutes = 15 minutes
-		if mins >= 60 then
+-- New helper function to format time message
+function BreakTime:GetFormattedTimeMessage()
+    local tmpStr = self.db.profile.customMessage
+    -- Calculate hours and minutes
+    newhrs = secs / 60 / 60
+    hrs = math.floor(newhrs)
+    newmins = secs / 60
+    mins = math.floor(newmins)
+    
+    if mins >= 60 then
 			mins = mins - (hrs * 60)
-		end
-		
-		-- replace "@hr" with the calculated hours from above
-		if hrs == 1 then
-			tmpStr = string.gsub(self.db.profile.customMessage, "@hr", hrs .. L[" hour"])
-		else
-			tmpStr = string.gsub(self.db.profile.customMessage, "@hr", hrs .. L[" hours"])
-		end
-		
-		-- replace "@min" with the calculated minutes found above
-		if mins == 1 then
-			tmpStr = string.gsub(tmpStr, "@min", mins .. L[" minute"])
-		else
-			tmpStr = string.gsub(tmpStr, "@min", mins .. L[" minutes"])
-		end
-		-- display the break message in the chat if it is enabled
-		if self.db.profile.showInChat then
-			self:Print(tmpStr)
-		end
-		-- display the break message on the screen on the UIErrorsFrame. Who would have thunk it?
-		if self.db.profile.showOnScreen then
-			self:ShowBreakWidget(tmpStr)
-		end
-		-- Using special characters helps to group the options that are relavant to each other
-		if strsub(self.db.profile.soundOptions, 1, 1) == "#" or strsub(self.db.profile.soundOptions, 1, 1) == "$"then
-			PlaySound(strsub(self.db.profile.soundOptions, 2))
-		elseif strsub(self.db.profile.soundOptions, 1, 1) == "@" then
-			PlaySoundFile(strsub(self.db.profile.soundOptions, 2))
-		end
-	end
+    end
+        
+    if hrs == 1 then
+        tmpStr = string.gsub(tmpStr, "@hr", hrs .. L[" hour"])
+    else
+        tmpStr = string.gsub(tmpStr, "@hr", hrs .. L[" hours"])
+    end
+    
+    if mins == 1 then
+        tmpStr = string.gsub(tmpStr, "@min", mins .. L[" minute"])
+    else
+        tmpStr = string.gsub(tmpStr, "@min", mins .. L[" minutes"])
+    end
+    return tmpStr
 end
 
+-- Modified function to handle time comparisons across midnight
+function BreakTime:IsTimeBetween(currentTime, startTime, endTime)
+    -- Convert times to minutes since midnight for easier comparison
+    local function timeToMinutes(timeStr)
+        local hour, minute = timeStr:match("(%d+):(%d+)")
+        return tonumber(hour) * 60 + tonumber(minute)
+    end
+    
+    local current = timeToMinutes(currentTime)
+    local start = timeToMinutes(startTime)
+    local end_ = timeToMinutes(endTime)
+    
+    -- Handle midnight crossing
+    if end_ < start then
+        return current >= start or current <= end_
+    else
+        return current >= start and current <= end_
+    end
+end
+
+-- Modified CheckSleepTime function
+function BreakTime:CheckSleepTime()
+    -- Skip check if NextSleepTimeCheck is set and we haven't reached that time yet
+    if NextSleepTimeCheck and time() < NextSleepTimeCheck then
+        return false
+    end
+    
+    local currentTime = date("%H:%M")
+    
+    -- Past final sleep time until wake up time
+    if self:IsTimeBetween(currentTime, SleepTimeSecond, WakeUpTime) then
+        self:ShowBreakWidget("It's Way Past Bedtime!", "It's already too late - time to wrap it up for today and get some rest.", false)
+        return true
+    -- Between initial sleep time and final warning
+    elseif self:IsTimeBetween(currentTime, SleepTimeFirst, SleepTimeSecond) then
+        self:ShowBreakWidget("Time to Prepare for Sleep", "It's getting quite late. You should start preparing for sleep.", true)
+        return true
+    end
+    return false
+end
+
+function BreakTime:IsTimeForBreak()
+    return secs % string.format("%i", strsub(self.db.profile.fireTime, 2)) == 0
+end
+
+-- Refactored CheckBreakEvent function
+function BreakTime:CheckBreakEvent()
+    secs = secs + 1
+    
+    -- Check sleep time first
+    if self:CheckSleepTime() then
+        return
+    end
+    
+    -- Check break time
+    if self:IsTimeForBreak() then
+        local message = self:GetFormattedTimeMessage()
+        
+        -- Display messages if enabled
+        if self.db.profile.showInChat then
+            self:Print(message)
+        end
+        if self.db.profile.showOnScreen then
+            self:ShowBreakWidget("It's time to take a break!", message, false, true)
+        end
+        
+        -- Play sound if configured
+        if strsub(self.db.profile.soundOptions, 1, 1) == "#" or strsub(self.db.profile.soundOptions, 1, 1) == "$" then
+            PlaySound(strsub(self.db.profile.soundOptions, 2))
+        elseif strsub(self.db.profile.soundOptions, 1, 1) == "@" then
+            PlaySoundFile(strsub(self.db.profile.soundOptions, 2))
+        end
+    end
+end
