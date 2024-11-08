@@ -264,7 +264,7 @@ end
 -- Function to create and show the custom widget
 function BreakTime:ShowBreakWidget(title, description, showPlayMoreButton, shouldHideAfterTimeout)
     -- Check if frame is already visible
-    if not BreakTimeFrame or BreakTimeFrame and BreakTimeFrame:IsVisible() then
+    if not BreakTimeFrame or BreakTimeFrame:IsVisible() then
         return
     end
 
